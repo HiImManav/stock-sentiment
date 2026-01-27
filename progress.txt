@@ -1,0 +1,72 @@
+2026-01-27: Completed Task 1 — Project scaffolding.
+- Created pyproject.toml with all dependencies (boto3, beautifulsoup4, faiss-cpu, numpy, click, fastapi, uvicorn, mangum, httpx, tiktoken) and dev/infra optional groups.
+- Created full directory structure under src/sec_agent/ with subpackages: tools, parser, retrieval, memory, api, cli.
+- Created infra/ directory with app.py and stacks/sec_agent_stack.py.
+- Created tests/ directory with test_parser.py, test_chunker.py, test_retrieval.py, test_agent.py.
+- All __init__.py files and module stubs created as empty files ready for implementation.
+- CLI entry point configured as "sec-agent" pointing to sec_agent.cli.main:cli.
+- Configured ruff, mypy, and pytest in pyproject.toml.
+
+2026-01-27: Completed Task 2 — SEC EDGAR fetcher.
+- edgar_client.py: EdgarClient class with rate limiting, CIK lookup via company_tickers.json, list_filings via submissions API, download_filing from EDGAR archives.
+- FilingMetadata dataclass with accession_number, filing_type, filing_date, primary_document, cik.
+- Context manager support, configurable User-Agent via SEC_EDGAR_USER_AGENT env var.
+- test_edgar_client.py: Full test suite using httpx MockTransport (get_cik, list_filings, download_filing, context manager).
+
+2026-01-27: Completed Task 3 — Filing parser.
+- filing_parser.py: parse_filing() extracts sections from 10-K and 10-Q HTML using Item header regex matching.
+- Section dataclass with name, item_number, text, start_pos, end_pos.
+- Canonical section name maps for 10-K (Items 1-15) and 10-Q (Items 1-4).
+- Deduplication logic to skip ToC references and keep actual content sections.
+- Fallback parser (_parse_by_section_names) matching known section name patterns.
+- parse_8k() handles 8-K decimal-numbered items (e.g., Item 1.01, 2.02).
+- test_parser.py: Tests for 10-K/10-Q/8-K parsing, short section skipping, unknown items, empty HTML, ToC deduplication.
+
+2026-01-27: Completed Task 4 — Section-aware chunking engine.
+- chunker.py: chunk_section() and chunk_filing() functions for splitting sections into retrieval-friendly chunks.
+- Chunk dataclass with text, metadata dict (section_name, item_number, filing_type, ticker, accession_number, chunk_index), and token_count.
+- Token counting via tiktoken (cl100k_base encoding).
+- Paragraph-boundary splitting with configurable max_tokens (default 1500) and overlap (default 200 tokens).
+- Sentence-boundary fallback for paragraphs exceeding max_tokens using regex split on sentence endings.
+- Table block detection heuristic (pipe/tab counts) — tables kept as single chunks, never split across rows.
+- Overlap support: trailing paragraphs/sentences carried into next chunk for retrieval continuity.
+- chunk_filing() processes all sections and returns flat list with per-section chunk_index values.
+- test_chunker.py: Tests for single chunk, paragraph splitting, overlap, sentence fallback, empty sections, metadata fields, table preservation, multi-section filing, and chunk index correctness.
+
+2026-01-27: Completed Task 5 — S3 storage layer.
+- s3_cache.py: S3Cache class with get_cached_filing(), cache_filing(), list_cached_filings() methods.
+- FilingChunks dataclass with to_dict()/from_dict() serialization for JSON storage in S3.
+- S3 key schema: filings/{ticker}/{filing_type}/{accession_number}/chunks.json.
+- Configurable bucket via SEC_FILINGS_BUCKET env var, injectable S3 client for testing.
+- Pagination support for list_cached_filings using S3 paginator.
+- test_s3_cache.py: Tests using moto mock_aws for cache/retrieve roundtrip, not-found handling, listing (empty/single/multiple), overwrite behavior, key format, and FilingChunks serialization.
+
+2026-01-27: Completed Task 6 — Embedding + FAISS retrieval at query time.
+- embeddings.py: EmbeddingModel class wrapping Bedrock Titan Text Embeddings V2 (amazon.titan-embed-text-v2:0).
+- embed_texts() returns (N, 1024) float32 ndarray by invoking model per text; embed_query() returns (1, 1024).
+- Configurable model_id and injectable bedrock_client for testing.
+- vector_store.py: build_index() creates FAISS IndexFlatIP with L2-normalized embeddings for cosine similarity.
+- search() returns top-k ranked Chunk objects with optional section_filter (item_number match).
+- Over-fetches (3x top_k) when section_filter is active to ensure enough filtered results.
+- test_retrieval.py: Tests for EmbeddingModel (embed_texts, embed_query, empty input, custom model_id, invoke body verification) and vector store (build+search, empty index, section filter, top_k > index size, correct chunk ordering).
+
+2026-01-27: Completed Task 7 — AgentCore Bedrock agent (tool definitions, orchestration).
+- agent.py: SECFilingsAgent class using Bedrock Converse API with tool use loop.
+- TOOL_CONFIG dict with Bedrock-compatible toolSpec schemas for fetch_and_parse_filing, query_filing, list_available_filings.
+- SYSTEM_PROMPT defining the agent's role as SEC filings analyst with step-by-step instructions.
+- _execute_tool() dispatcher mapping tool names to handler functions.
+- Agent loop: sends user message, processes tool_use stop reasons by executing tools and returning results, repeats until end_turn or max_turns exceeded.
+- Conversation history maintained in _messages list; reset() clears it.
+- Configurable model_id (default: anthropic.claude-opus-4-5-20251101-v1:0), injectable bedrock_client for testing, configurable max_turns.
+- tools/fetch_filing.py: fetch_and_parse_filing() orchestrates EdgarClient → parser → chunker → S3Cache pipeline. Checks cache before downloading. Handles 8-K via parse_8k(). Injectable dependencies for testing.
+- tools/query_section.py: query_filing() loads cached chunks, builds FAISS index, performs semantic search, returns ranked context chunks. list_available_filings() lists cached S3 keys for a ticker.
+- test_agent.py: Tests for fetch_and_parse_filing (fetch+cache, cache hit, not found, 8-K), query_filing (returns chunks, no cache error), list_available_filings (empty, with filings), _execute_tool (unknown tool, dispatch), SECFilingsAgent (single turn, tool use loop, max turns, reset, system prompt, tool config, converse args).
+
+2026-01-27: Completed Task 8 — AgentCore memory integration.
+- agent_memory.py already had AgentMemory class with MemoryEntry dataclass, store_analysis(), get_recent_analyses(), get_session_context(), clear() methods, and session_id support (auto-generated or custom).
+- agent.py: Added get_memory and save_memory tool schemas to TOOL_CONFIG (now 5 tools total).
+- agent.py: Updated SYSTEM_PROMPT to instruct agent to check memory before fetching and save findings after analysis.
+- agent.py: Added _MEMORY_TOOLS set and _execute_memory_tool() dispatcher for memory tools. Updated _execute_tool() to accept optional memory parameter and route memory tools accordingly.
+- agent.py: SECFilingsAgent now owns an AgentMemory instance (injectable or auto-created). Memory passed to _execute_tool() during tool use loop. Added memory property. reset() now clears both messages and memory.
+- test_memory.py: 14 tests covering MemoryEntry (roundtrip, default timestamp), AgentMemory (session id, store/retrieve, ticker filter, session context, clear, empty), and memory tool dispatch (save, get all, get by ticker, no memory error, unknown tool).
+- test_agent.py: Updated test_tool_config_has_all_tools to expect 5 tools including get_memory and save_memory.
