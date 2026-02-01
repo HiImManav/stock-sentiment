@@ -12,10 +12,10 @@
 | 6 | Embedding + FAISS retrieval at query time | DONE |
 | 7 | AgentCore Bedrock agent (tool definitions, orchestration) | DONE |
 | 8 | AgentCore memory integration (short-term memory) | DONE |
-| 9 | CLI interface | NOT STARTED |
-| 10 | REST API (FastAPI) | NOT STARTED |
-| 11 | AWS CDK infrastructure stack | NOT STARTED |
-| 12 | Tests | NOT STARTED |
+| 9 | CLI interface | DONE |
+| 10 | REST API (FastAPI) | DONE |
+| 11 | AWS CDK infrastructure stack | DONE |
+| 12 | Tests | DONE |
 
 ---
 

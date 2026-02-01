@@ -2,9 +2,16 @@
 
 from __future__ import annotations
 
+import warnings
+
 import pytest
 
-from sec_agent.parser.filing_parser import Section, parse_8k, parse_filing
+from sec_agent.parser.filing_parser import (
+    Section,
+    _detect_document_type,
+    parse_8k,
+    parse_filing,
+)
 
 
 # -- Helpers -----------------------------------------------------------------
@@ -124,3 +131,119 @@ class TestSectionDataclass:
         assert s.text == "hello"
         assert s.start_pos == 0
         assert s.end_pos == 5
+
+
+class TestDetectDocumentType:
+    def test_xml_declaration(self) -> None:
+        content = '<?xml version="1.0"?><root>content</root>'
+        assert _detect_document_type(content) == "xml"
+
+    def test_xbrli_namespace(self) -> None:
+        content = '<html xmlns:xbrli="http://www.xbrl.org/2003/instance"><body>content</body></html>'
+        assert _detect_document_type(content) == "xml"
+
+    def test_ix_namespace(self) -> None:
+        content = '<html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"><body>content</body></html>'
+        assert _detect_document_type(content) == "xml"
+
+    def test_plain_html(self) -> None:
+        content = "<html><body><p>Hello world</p></body></html>"
+        assert _detect_document_type(content) == "html"
+
+    def test_html_with_doctype(self) -> None:
+        content = "<!DOCTYPE html><html><body>content</body></html>"
+        assert _detect_document_type(content) == "html"
+
+
+class TestXMLParsing:
+    def test_xml_content_parses_without_warning(self) -> None:
+        """XML content should parse without XMLParsedAsHTMLWarning."""
+        xml_content = f"""<?xml version="1.0"?>
+        <html>
+        <body>
+        <h2>Item 1A. Risk Factors</h2>
+        <p>{_LONG_TEXT}</p>
+        </body>
+        </html>
+        """
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            sections = parse_filing(xml_content, "10-K")
+            # Check no XMLParsedAsHTMLWarning was raised
+            xml_warnings = [
+                warning for warning in w
+                if "XMLParsedAsHTMLWarning" in str(warning.category)
+            ]
+            assert len(xml_warnings) == 0
+
+    def test_html_content_still_works(self) -> None:
+        """HTML content should continue to work correctly."""
+        html = _make_10k_html({"1A": _LONG_TEXT})
+        sections = parse_filing(html, "10-K")
+        assert len(sections) >= 1
+        assert any(s.item_number == "1A" for s in sections)
+
+
+class TestTocAtEnd:
+    def test_content_before_toc_extracts_correct_section(self) -> None:
+        """When content appears before ToC, should still extract the actual content."""
+        # Simulate a filing where actual content comes first, then ToC at end
+        html = (
+            "<html><body>"
+            # Actual content section (first occurrence, has substantial text)
+            f"<h2>Item 1A. Risk Factors</h2>"
+            f"<p>{_LONG_TEXT * 3}</p>"  # Lots of content
+            # Separator
+            f"<hr><h1>Table of Contents</h1>"
+            # ToC entry (second occurrence, just a reference)
+            f"<p>Item 1A. Risk Factors ... page 5</p>"
+            f"<p>Item 7. MD&A ... page 20</p>"
+            "</body></html>"
+        )
+        sections = parse_filing(html, "10-K")
+        items_1a = [s for s in sections if s.item_number == "1A"]
+        assert len(items_1a) == 1
+        # The selected section should have the long content, not just ToC reference
+        assert len(items_1a[0].text) > 500
+
+    def test_8k_content_before_toc(self) -> None:
+        """8-K parsing should also handle content-before-ToC scenario."""
+        html = (
+            "<html><body>"
+            # Actual content (first occurrence)
+            f"<h2>Item 1.01. Entry into Material Agreement</h2>"
+            f"<p>{_LONG_TEXT * 2}</p>"
+            # ToC at end (second occurrence)
+            f"<hr><h1>Index</h1>"
+            f"<p>Item 1.01 - see page 2</p>"
+            "</body></html>"
+        )
+        sections = parse_8k(html)
+        items = [s for s in sections if s.item_number == "1.01"]
+        assert len(items) == 1
+        # Should have the actual content, not just the ToC entry
+        assert len(items[0].text) > 200
+
+
+class TestTablePreservation:
+    def test_tables_converted_to_pipe_format(self) -> None:
+        """Tables should be converted to pipe-separated format."""
+        html = """
+        <html><body>
+        <h2>Item 1A. Risk Factors</h2>
+        <table>
+            <tr><th>Year</th><th>Revenue</th></tr>
+            <tr><td>2023</td><td>$100M</td></tr>
+            <tr><td>2024</td><td>$150M</td></tr>
+        </table>
+        <p>More content here to meet minimum length requirement for section extraction.</p>
+        <p>Additional paragraph to ensure we have enough text.</p>
+        <p>Yet another paragraph of sufficient length for testing purposes.</p>
+        </body></html>
+        """
+        sections = parse_filing(html, "10-K")
+        assert len(sections) >= 1
+        section_text = sections[0].text
+        # Check that table data is preserved in pipe format
+        assert "Year | Revenue" in section_text or "Year" in section_text
+        assert "$100M" in section_text

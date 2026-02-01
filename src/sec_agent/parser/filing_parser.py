@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup, Tag
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -72,10 +75,42 @@ _SECTION_NAME_PATTERNS: list[tuple[str, str]] = [
 ]
 
 
+def _detect_document_type(content: str) -> str:
+    """Detect if content is XML or HTML.
+
+    Args:
+        content: Raw document content.
+
+    Returns:
+        'xml' if the content appears to be XML/XBRL, 'html' otherwise.
+    """
+    content_start = content.strip()[:500].lower()
+    if content_start.startswith("<?xml"):
+        return "xml"
+    if "xmlns:xbrli" in content_start or "xmlns:ix" in content_start:
+        return "xml"
+    return "html"
+
+
 def _extract_text(soup: BeautifulSoup) -> str:
-    """Get clean text from parsed HTML, preserving paragraph breaks."""
+    """Get clean text from parsed HTML, preserving paragraph breaks and tables.
+
+    Tables are converted to pipe-separated format to preserve structure.
+    """
     for tag in soup.find_all(["script", "style"]):
         tag.decompose()
+
+    # Convert tables to pipe-separated text format
+    for table in soup.find_all("table"):
+        rows = []
+        for tr in table.find_all("tr"):
+            cells = [
+                td.get_text(strip=True) for td in tr.find_all(["td", "th"])
+            ]
+            if cells:
+                rows.append(" | ".join(cells))
+        table.replace_with("\n".join(rows) + "\n")
+
     text = soup.get_text(separator="\n")
     # Collapse multiple blank lines
     text = re.sub(r"\n{3,}", "\n\n", text)
@@ -92,12 +127,34 @@ def _is_toc_link(element: Tag) -> bool:
     return False
 
 
+def _content_length_after(
+    pos: int, text: str, all_positions: list[tuple[int, str]]
+) -> int:
+    """Calculate content length from a position to the next item header.
+
+    Args:
+        pos: Starting position in text.
+        text: Full document text.
+        all_positions: All (position, item_number) tuples, sorted by position.
+
+    Returns:
+        Number of characters between this position and the next item header.
+    """
+    # Find the next position after this one
+    next_pos = len(text)
+    for p, _ in all_positions:
+        if p > pos:
+            next_pos = p
+            break
+    return next_pos - pos
+
+
 def _find_item_positions(text: str) -> list[tuple[int, str]]:
     """Find all Item header positions and their item numbers in the text.
 
     Returns a list of (position, item_number) tuples sorted by position.
-    Filters out likely table-of-contents entries by requiring substantial
-    text between consecutive items.
+    For duplicate item numbers, keeps the occurrence with the most content
+    following it (the actual section, not ToC references).
     """
     matches: list[tuple[int, str]] = []
     for m in _ITEM_HEADER_RE.finditer(text):
@@ -106,6 +163,9 @@ def _find_item_positions(text: str) -> list[tuple[int, str]]:
 
     if not matches:
         return []
+
+    # Sort by position for content length calculation
+    matches.sort(key=lambda x: x[0])
 
     # Deduplicate: for each item number, if it appears multiple times,
     # keep the occurrence with the most text following it (likely the actual
@@ -119,11 +179,21 @@ def _find_item_positions(text: str) -> list[tuple[int, str]]:
         if len(occurrences) == 1:
             result.append(occurrences[0])
         else:
-            # Pick the last occurrence — usually the actual content section
-            # (ToC comes first in filings).
-            result.append(occurrences[-1])
+            # Pick the occurrence with the most content following it
+            best = max(
+                occurrences,
+                key=lambda x: _content_length_after(x[0], text, matches),
+            )
+            logger.debug(
+                "Item %s has %d occurrences, selected position %d with most content",
+                item_num,
+                len(occurrences),
+                best[0],
+            )
+            result.append(best)
 
     result.sort(key=lambda x: x[0])
+    logger.debug("Found %d unique item positions", len(result))
     return result
 
 
@@ -137,10 +207,15 @@ def parse_filing(html: str, filing_type: str) -> list[Section]:
     Returns:
         List of Section objects extracted from the filing.
     """
-    soup = BeautifulSoup(html, "lxml")
+    doc_type = _detect_document_type(html)
+    parser = "lxml-xml" if doc_type == "xml" else "lxml"
+    logger.debug("Detected document type: %s, using parser: %s", doc_type, parser)
+
+    soup = BeautifulSoup(html, parser)
     full_text = _extract_text(soup)
 
     if not full_text:
+        logger.warning("Empty text extracted from %s filing", filing_type)
         return []
 
     section_map = _SECTION_MAPS.get(filing_type.upper(), {})
@@ -215,10 +290,15 @@ def parse_8k(html: str) -> list[Section]:
 
     8-K items use a different numbering scheme (e.g., Item 1.01, Item 2.02).
     """
-    soup = BeautifulSoup(html, "lxml")
+    doc_type = _detect_document_type(html)
+    parser = "lxml-xml" if doc_type == "xml" else "lxml"
+    logger.debug("Detected document type: %s, using parser: %s", doc_type, parser)
+
+    soup = BeautifulSoup(html, parser)
     full_text = _extract_text(soup)
 
     if not full_text:
+        logger.warning("Empty text extracted from 8-K filing")
         return []
 
     # 8-K items use decimal numbering: Item 1.01, Item 2.02, etc.
@@ -231,12 +311,37 @@ def parse_8k(html: str) -> list[Section]:
     for m in pattern.finditer(full_text):
         matches.append((m.start(), m.group(1)))
 
-    # Deduplicate: keep last occurrence of each item
-    by_item: dict[str, tuple[int, str]] = {}
-    for pos, item_num in matches:
-        by_item[item_num] = (pos, item_num)
+    if not matches:
+        logger.debug("No 8-K item headers found")
+        return []
 
-    sorted_items = sorted(by_item.values(), key=lambda x: x[0])
+    # Sort by position for content length calculation
+    matches.sort(key=lambda x: x[0])
+
+    # Deduplicate: for each item, keep the occurrence with most content after it
+    by_item: dict[str, list[tuple[int, str]]] = {}
+    for pos, item_num in matches:
+        by_item.setdefault(item_num, []).append((pos, item_num))
+
+    deduped: list[tuple[int, str]] = []
+    for item_num, occurrences in by_item.items():
+        if len(occurrences) == 1:
+            deduped.append(occurrences[0])
+        else:
+            best = max(
+                occurrences,
+                key=lambda x: _content_length_after(x[0], full_text, matches),
+            )
+            logger.debug(
+                "8-K Item %s has %d occurrences, selected position %d",
+                item_num,
+                len(occurrences),
+                best[0],
+            )
+            deduped.append(best)
+
+    sorted_items = sorted(deduped, key=lambda x: x[0])
+    logger.debug("Found %d unique 8-K items", len(sorted_items))
 
     sections: list[Section] = []
     for i, (start_pos, item_num) in enumerate(sorted_items):

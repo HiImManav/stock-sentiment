@@ -237,12 +237,12 @@ class TestExecuteTool:
         assert result["status"] == "error"
         assert "Unknown tool" in result["message"]
 
-    @patch("sec_agent.agent.fetch_and_parse_filing")
-    def test_dispatches_fetch(self, mock_fetch: MagicMock) -> None:
-        mock_fetch.return_value = {"status": "ok"}
-        result_str = _execute_tool(
-            "fetch_and_parse_filing", {"ticker": "AAPL", "filing_type": "10-K"}
-        )
+    def test_dispatches_fetch(self) -> None:
+        mock_fetch = MagicMock(return_value={"status": "ok"})
+        with patch.dict("sec_agent.agent._TOOL_HANDLERS", {"fetch_and_parse_filing": mock_fetch}):
+            result_str = _execute_tool(
+                "fetch_and_parse_filing", {"ticker": "AAPL", "filing_type": "10-K"}
+            )
         result = json.loads(result_str)
         assert result["status"] == "ok"
         mock_fetch.assert_called_once_with(ticker="AAPL", filing_type="10-K")

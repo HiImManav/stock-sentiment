@@ -70,3 +70,38 @@
 - agent.py: SECFilingsAgent now owns an AgentMemory instance (injectable or auto-created). Memory passed to _execute_tool() during tool use loop. Added memory property. reset() now clears both messages and memory.
 - test_memory.py: 14 tests covering MemoryEntry (roundtrip, default timestamp), AgentMemory (session id, store/retrieve, ticker filter, session context, clear, empty), and memory tool dispatch (save, get all, get by ticker, no memory error, unknown tool).
 - test_agent.py: Updated test_tool_config_has_all_tools to expect 5 tools including get_memory and save_memory.
+
+2026-01-27: Completed Task 9 — CLI interface.
+- cli/main.py: Click-based CLI with 4 commands: chat, query, fetch, list-filings.
+- chat: Interactive session using SECFilingsAgent with conversation loop, exit/quit support.
+- query: One-shot question with --ticker, --filing, --section options. Constructs prompt and delegates to agent.
+- fetch: Pre-fetch and cache a filing via fetch_and_parse_filing(). Supports --index for older filings.
+- list-filings: Shows cached S3 keys for a ticker via list_available_filings().
+- Entry point configured as "sec-agent" in pyproject.toml.
+- Fixed pyproject.toml build-backend from invalid "setuptools.backends._legacy:_Backend" to "setuptools.build_meta".
+- test_cli.py: 19 tests covering all commands (chat exit/quit/query/error/empty, query basic/section/error/missing args, fetch success/error/exception/index, list-filings with results/empty/error, help text).
+
+2026-01-27: Completed Task 10 — REST API (FastAPI).
+- api/server.py: FastAPI app with 4 endpoints: GET /health, POST /query, POST /fetch, GET /filings/{ticker}.
+- Pydantic request/response models: QueryRequest, QueryResponse, FetchRequest, FetchResponse, FilingsListResponse, HealthResponse.
+- POST /query delegates to SECFilingsAgent singleton, returns answer, sources, and session_id.
+- POST /fetch calls fetch_and_parse_filing(), returns status, sections_found, chunk_count. Returns 404 on failure.
+- GET /filings/{ticker} calls list_available_filings(), returns cached filing keys.
+- Lazy agent singleton via _get_agent() for session continuity across queries.
+- test_api.py: 9 tests covering health check, fetch success/not-found/missing-fields, list-filings with results/empty, query success/missing-fields, and agent singleton creation.
+
+2026-01-27: Completed Task 11 — AWS CDK infrastructure stack.
+- infra/stacks/sec_agent_stack.py: SecAgentStack with S3 bucket (sec-filings-cache-{account}), Lambda function (Python 3.11, 512MB, 120s timeout), API Gateway (proxy REST API), IAM policies (S3 read/write, Bedrock invoke), CloudWatch log retention (2 weeks).
+- S3 bucket: S3-managed encryption, block all public access, auto-delete on stack destroy.
+- Lambda: Packages src/ via Code.from_asset, excludes infra/tests/.git/.venv. Environment variables for SEC_FILINGS_BUCKET and SEC_EDGAR_USER_AGENT.
+- API Gateway: LambdaRestApi with proxy mode, prod stage.
+- infra/app.py: CDK app entry point instantiating SecAgentStack.
+- infra/cdk.json: CDK configuration pointing to app.py.
+- src/sec_agent/mangum_handler.py: Mangum adapter wrapping FastAPI app for Lambda invocation.
+- CfnOutputs for ApiUrl and BucketName.
+
+2026-01-27: Completed Task 12 — Tests.
+- All 108 tests already existed across 9 test files, written alongside each component (tasks 2–11).
+- Fixed test_agent.py::TestExecuteTool::test_dispatches_fetch which failed due to _TOOL_HANDLERS dict holding a direct reference — changed from @patch on module attribute to patch.dict on _TOOL_HANDLERS.
+- All 108 tests now pass (pytest). mypy errors are limited to missing boto3/faiss stubs (no py.typed markers) and minor type narrowing — no logic bugs.
+- Test coverage: edgar_client, filing_parser, chunker, s3_cache, embeddings, vector_store, agent_memory, agent orchestration, CLI, REST API.
