@@ -129,7 +129,7 @@ src/orchestrator/
 ### Phase 6: Testing & Polish
 | Task | Description | Status |
 |------|-------------|--------|
-| 6.1 | Write comprehensive unit tests | Pending |
+| 6.1 | Write comprehensive unit tests | Done |
 | 6.2 | Write integration tests | Pending |
 | 6.3 | Add type hints and run mypy | Pending |
 
