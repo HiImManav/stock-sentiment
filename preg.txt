@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 4 In Progress (4.1 Done)
+## Current Status: Phase 4 In Progress (4.2 Done)
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -20,9 +20,10 @@
 - [x] 3.2 Implement discrepancy detection rules (49 tests, all passing, mypy clean)
 - [x] 3.3 Implement ComparisonResult generation (included in 3.2)
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (36 tests, all passing, mypy clean)
+- [x] 4.2 Implement OrchestratorMemory (39 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 4.2 Implement OrchestratorMemory
+- [ ] 4.3 Implement main OrchestrationAgent class
 
 ## Pending Tasks (in order)
 
@@ -33,7 +34,7 @@
 
 ### Phase 4: Synthesis & Main Agent
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
-- [ ] 4.2 Implement OrchestratorMemory
+- [x] 4.2 Implement OrchestratorMemory
 - [ ] 4.3 Implement main OrchestrationAgent class
 - [ ] 4.4 End-to-end integration tests
 
@@ -101,3 +102,22 @@ When resuming work:
   - User message building
   - Confidence calculation
   - Edge cases (empty/None responses, timeouts, errors)
+
+## Implementation Notes (Task 4.2)
+- Created `src/orchestrator/memory/agent_memory.py` with:
+  - `AgentResultEntry` dataclass: Stores sub-agent execution result (agent_name, status, response, error_message, execution_time_ms)
+  - `OrchestratedQueryEntry` dataclass: Stores full orchestrated query (user_query, route_type, agents_called, agent_results, synthesized_response, confidence, ticker, had_discrepancies, total_execution_time_ms)
+  - `OrchestratorMemory` class with methods:
+    - `store_query()`: Stores an orchestrated query result, returns query_id
+    - `get_recent_queries()`: Returns queries filtered by ticker, with limit support
+    - `get_query_by_id()`: Retrieves a specific query by its ID
+    - `get_last_query()`: Returns the most recent query
+    - `get_session_context()`: Returns full session data
+    - `get_session_summary()`: Returns summary with query count, tickers analyzed, discrepancy stats
+    - `clear()`: Clears all memory entries
+- Updated `src/orchestrator/memory/__init__.py` with exports
+- Created `tests/test_orchestrator_memory.py` with 39 tests covering:
+  - AgentResultEntry dataclass (create, to_dict, from_dict, roundtrip)
+  - OrchestratedQueryEntry dataclass (create, properties, serialization)
+  - OrchestratorMemory class (session_id, store, retrieve, filter, limit)
+  - Integration tests (full workflow, partial failure, multi-ticker session)
