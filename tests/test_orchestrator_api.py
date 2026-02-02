@@ -7,22 +7,22 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from src.orchestrator.api.server import app, get_agent
-from src.orchestrator.agent import OrchestrationResult
-from src.orchestrator.comparison.discrepancy import (
+from orchestrator.api.server import app, get_agent
+from orchestrator.agent import OrchestrationResult
+from orchestrator.comparison.discrepancy import (
     Agreement,
     ComparisonResult,
     Discrepancy,
     DiscrepancySeverity,
     DiscrepancyType,
 )
-from src.orchestrator.comparison.signals import (
+from orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
     SignalExtractionResult,
     SignalType,
 )
-from src.orchestrator.execution.result import AgentResult, AgentStatus
+from orchestrator.execution.result import AgentResult, AgentStatus
 
 client = TestClient(app)
 
@@ -52,7 +52,7 @@ class TestHealthEndpoint:
 class TestQueryEndpoint:
     """Tests for the /query endpoint."""
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_success(self, mock_get_agent: MagicMock) -> None:
         """Query endpoint returns successful response."""
         mock_agent = MagicMock()
@@ -79,7 +79,7 @@ class TestQueryEndpoint:
         assert data["session_id"] == "test-session-123"
         assert data["query_id"] == "query-abc123"
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_ticker(self, mock_get_agent: MagicMock) -> None:
         """Query endpoint passes ticker to agent."""
         mock_agent = MagicMock()
@@ -106,7 +106,7 @@ class TestQueryEndpoint:
             force_route=None,
         )
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_sources_news_only(self, mock_get_agent: MagicMock) -> None:
         """Query with sources=['news'] forces news_only route."""
         mock_agent = MagicMock()
@@ -133,7 +133,7 @@ class TestQueryEndpoint:
             force_route="news_only",
         )
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_sources_sec_only(self, mock_get_agent: MagicMock) -> None:
         """Query with sources=['sec'] forces sec_only route."""
         mock_agent = MagicMock()
@@ -160,7 +160,7 @@ class TestQueryEndpoint:
             force_route="sec_only",
         )
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_sources_both(self, mock_get_agent: MagicMock) -> None:
         """Query with sources=['news', 'sec'] forces both route."""
         mock_agent = MagicMock()
@@ -187,7 +187,7 @@ class TestQueryEndpoint:
             force_route="both",
         )
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_discrepancies(self, mock_get_agent: MagicMock) -> None:
         """Query response includes discrepancy flag."""
         mock_agent = MagicMock()
@@ -209,7 +209,7 @@ class TestQueryEndpoint:
         assert data["had_discrepancies"] is True
         assert data["confidence"] == 0.65
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_error_handling(self, mock_get_agent: MagicMock) -> None:
         """Query endpoint handles errors gracefully."""
         mock_agent = MagicMock()
@@ -228,7 +228,7 @@ class TestQueryEndpoint:
     def test_query_empty_query(self) -> None:
         """Query endpoint accepts empty query string."""
         # FastAPI/Pydantic should accept empty string (no minLength constraint)
-        with patch("src.orchestrator.api.server.get_agent") as mock_get_agent:
+        with patch("orchestrator.api.server.get_agent") as mock_get_agent:
             mock_agent = MagicMock()
             mock_agent.session_id = "test"
             mock_agent.query.return_value = OrchestrationResult(
@@ -255,7 +255,7 @@ class TestQueryEndpoint:
 class TestCompareEndpoint:
     """Tests for the /compare endpoint."""
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_compare_success(self, mock_get_agent: MagicMock) -> None:
         """Compare endpoint returns successful response."""
         mock_agent = MagicMock()
@@ -283,7 +283,7 @@ class TestCompareEndpoint:
         assert data["session_id"] == "test-session"
         assert data["query_id"] == "compare-123"
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_compare_with_discrepancies(self, mock_get_agent: MagicMock) -> None:
         """Compare endpoint includes discrepancy details."""
         # Create mock signals
@@ -362,7 +362,7 @@ class TestCompareEndpoint:
         assert data["agreements"][0]["topic"] == "growth"
         assert data["agreements"][0]["direction"] == "positive"
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_compare_lowercase_ticker(self, mock_get_agent: MagicMock) -> None:
         """Compare endpoint uppercases ticker in response."""
         mock_agent = MagicMock()
@@ -383,7 +383,7 @@ class TestCompareEndpoint:
         assert resp.status_code == 200
         assert resp.json()["ticker"] == "AAPL"
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_compare_error_handling(self, mock_get_agent: MagicMock) -> None:
         """Compare endpoint handles errors gracefully."""
         mock_agent = MagicMock()
@@ -408,7 +408,7 @@ class TestCompareEndpoint:
 class TestSessionSummaryEndpoint:
     """Tests for the /session/summary endpoint."""
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_summary_success(self, mock_get_agent: MagicMock) -> None:
         """Session summary endpoint returns stats."""
         mock_agent = MagicMock()
@@ -430,7 +430,7 @@ class TestSessionSummaryEndpoint:
         assert data["discrepancy_rate"] == 0.4
         assert data["average_confidence"] == 0.78
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_summary_empty_session(self, mock_get_agent: MagicMock) -> None:
         """Session summary for empty session."""
         mock_agent = MagicMock()
@@ -458,7 +458,7 @@ class TestSessionSummaryEndpoint:
 class TestSessionHistoryEndpoint:
     """Tests for the /session/history endpoint."""
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_history_success(self, mock_get_agent: MagicMock) -> None:
         """Session history returns query list."""
         mock_agent = MagicMock()
@@ -475,7 +475,7 @@ class TestSessionHistoryEndpoint:
         assert data[0]["query_id"] == "q1"
         assert data[1]["ticker"] == "TSLA"
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_history_with_ticker_filter(self, mock_get_agent: MagicMock) -> None:
         """Session history with ticker filter."""
         mock_agent = MagicMock()
@@ -488,7 +488,7 @@ class TestSessionHistoryEndpoint:
         assert resp.status_code == 200
         mock_agent.get_recent_queries.assert_called_once_with(ticker="AAPL", limit=None)
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_history_with_limit(self, mock_get_agent: MagicMock) -> None:
         """Session history with limit parameter."""
         mock_agent = MagicMock()
@@ -501,7 +501,7 @@ class TestSessionHistoryEndpoint:
         assert resp.status_code == 200
         mock_agent.get_recent_queries.assert_called_once_with(ticker=None, limit=1)
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_history_with_both_filters(self, mock_get_agent: MagicMock) -> None:
         """Session history with both ticker and limit."""
         mock_agent = MagicMock()
@@ -512,7 +512,7 @@ class TestSessionHistoryEndpoint:
         assert resp.status_code == 200
         mock_agent.get_recent_queries.assert_called_once_with(ticker="MSFT", limit=5)
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_session_history_empty(self, mock_get_agent: MagicMock) -> None:
         """Session history returns empty list for new session."""
         mock_agent = MagicMock()
@@ -532,7 +532,7 @@ class TestSessionHistoryEndpoint:
 class TestResetEndpoint:
     """Tests for the /reset endpoint."""
 
-    @patch("src.orchestrator.api.server._agent", None)
+    @patch("orchestrator.api.server._agent", None)
     def test_reset_no_agent(self) -> None:
         """Reset when no agent exists."""
         resp = client.post("/reset")
@@ -543,7 +543,7 @@ class TestResetEndpoint:
 
     def test_reset_with_agent(self) -> None:
         """Reset clears existing agent."""
-        import src.orchestrator.api.server as mod
+        import orchestrator.api.server as mod
 
         mock_agent = MagicMock()
         mod._agent = mock_agent
@@ -566,10 +566,10 @@ class TestResetEndpoint:
 class TestAgentSingleton:
     """Tests for the agent singleton pattern."""
 
-    @patch("src.orchestrator.api.server.OrchestrationAgent")
+    @patch("orchestrator.api.server.OrchestrationAgent")
     def test_get_agent_creates_singleton(self, mock_cls: MagicMock) -> None:
         """get_agent creates singleton instance."""
-        import src.orchestrator.api.server as mod
+        import orchestrator.api.server as mod
 
         mod._agent = None
         mock_cls.return_value = MagicMock()
@@ -592,7 +592,7 @@ class TestAgentSingleton:
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_query_with_all_options(self, mock_get_agent: MagicMock) -> None:
         """Query with all optional parameters."""
         mock_agent = MagicMock()
@@ -619,7 +619,7 @@ class TestEdgeCases:
         )
         assert resp.status_code == 200
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_compare_no_comparison_result(self, mock_get_agent: MagicMock) -> None:
         """Compare endpoint handles None comparison gracefully."""
         mock_agent = MagicMock()
@@ -643,7 +643,7 @@ class TestEdgeCases:
         assert data["agreements"] == []
         assert data["alignment_score"] is None
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_confidence_bounds(self, mock_get_agent: MagicMock) -> None:
         """Confidence values are within valid bounds."""
         mock_agent = MagicMock()
@@ -663,7 +663,7 @@ class TestEdgeCases:
         assert resp.status_code == 200
         assert resp.json()["confidence"] == 1.0
 
-    @patch("src.orchestrator.api.server.get_agent")
+    @patch("orchestrator.api.server.get_agent")
     def test_sources_order_independent(self, mock_get_agent: MagicMock) -> None:
         """Sources list order doesn't matter for 'both' route."""
         mock_agent = MagicMock()

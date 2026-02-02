@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.orchestrator.execution.result import (
+from orchestrator.execution.result import (
     AgentResult,
     AgentStatus,
     QueryClassification,

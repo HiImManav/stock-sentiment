@@ -20,23 +20,23 @@ import pytest
 from click.testing import CliRunner
 from fastapi.testclient import TestClient
 
-from src.orchestrator.agent import OrchestrationAgent, OrchestrationResult
-from src.orchestrator.api.server import app, get_agent
-from src.orchestrator.cli.main import cli
-from src.orchestrator.comparison import (
+from orchestrator.agent import OrchestrationAgent, OrchestrationResult
+from orchestrator.api.server import app, get_agent
+from orchestrator.cli.main import cli
+from orchestrator.comparison import (
     ComparisonResult,
     DiscrepancyDetector,
     SignalExtractor,
 )
-from src.orchestrator.execution import (
+from orchestrator.execution import (
     AgentResult,
     AgentStatus,
     AsyncAgentExecutor,
     ExecutionResult,
 )
-from src.orchestrator.memory import OrchestratorMemory
-from src.orchestrator.routing import QueryClassifier
-from src.orchestrator.synthesis import ResponseSynthesizer, SynthesisInput
+from orchestrator.memory import OrchestratorMemory
+from orchestrator.routing import QueryClassifier
+from orchestrator.synthesis import ResponseSynthesizer, SynthesisInput
 
 
 # =============================================================================
@@ -149,7 +149,7 @@ def orchestrator_with_mocks(
 def api_client(orchestrator_with_mocks: OrchestrationAgent) -> Generator[TestClient, None, None]:
     """Create a test client with mocked orchestrator."""
     # Override the get_agent dependency
-    import src.orchestrator.api.server as server_module
+    import orchestrator.api.server as server_module
 
     original_agent = server_module._agent
     server_module._agent = orchestrator_with_mocks
@@ -343,7 +343,7 @@ class TestCLIOrchestrationIntegration:
         mock_bedrock_client: MagicMock,
     ) -> None:
         """Test that query command produces proper output."""
-        with patch("src.orchestrator.cli.main.OrchestrationAgent") as MockAgent:
+        with patch("orchestrator.cli.main.OrchestrationAgent") as MockAgent:
             # Create a mock orchestrator
             mock_orchestrator = MagicMock()
             mock_orchestrator.query.return_value = OrchestrationResult(
@@ -368,7 +368,7 @@ class TestCLIOrchestrationIntegration:
         self, cli_runner: CliRunner
     ) -> None:
         """Test that --json-output produces valid JSON."""
-        with patch("src.orchestrator.cli.main.OrchestrationAgent") as MockAgent:
+        with patch("orchestrator.cli.main.OrchestrationAgent") as MockAgent:
             mock_orchestrator = MagicMock()
             mock_result = OrchestrationResult(
                 response="Test response",
@@ -397,7 +397,7 @@ class TestCLIOrchestrationIntegration:
         self, cli_runner: CliRunner
     ) -> None:
         """Test that --source option correctly routes queries."""
-        with patch("src.orchestrator.cli.main.OrchestrationAgent") as MockAgent:
+        with patch("orchestrator.cli.main.OrchestrationAgent") as MockAgent:
             mock_orchestrator = MagicMock()
             mock_orchestrator.query.return_value = OrchestrationResult(
                 response="Response",
@@ -424,7 +424,7 @@ class TestCLIOrchestrationIntegration:
         self, cli_runner: CliRunner
     ) -> None:
         """Test that compare command runs full comparison."""
-        with patch("src.orchestrator.cli.main.OrchestrationAgent") as MockAgent:
+        with patch("orchestrator.cli.main.OrchestrationAgent") as MockAgent:
             mock_orchestrator = MagicMock()
             mock_result = OrchestrationResult(
                 response="Comparison result",
@@ -798,7 +798,7 @@ class TestErrorPropagationIntegration:
         self, api_client: TestClient
     ) -> None:
         """Test that agent errors result in proper HTTP error responses."""
-        import src.orchestrator.api.server as server_module
+        import orchestrator.api.server as server_module
 
         # Make the orchestrator throw an error
         original_agent = server_module._agent
@@ -828,7 +828,7 @@ class TestLambdaHandlerIntegration:
 
     def test_lambda_handler_wraps_fastapi_app(self) -> None:
         """Test that Lambda handler properly wraps the FastAPI app."""
-        from src.orchestrator.mangum_handler import handler
+        from orchestrator.mangum_handler import handler
 
         # Handler should be callable
         assert callable(handler)
@@ -836,8 +836,8 @@ class TestLambdaHandlerIntegration:
     def test_lambda_handler_routes_to_health(self) -> None:
         """Test that Lambda handler can route to /health endpoint via TestClient."""
         # Use TestClient which properly handles the ASGI interface
-        from src.orchestrator.mangum_handler import handler
-        from src.orchestrator.api.server import app
+        from orchestrator.mangum_handler import handler
+        from orchestrator.api.server import app
 
         with TestClient(app) as client:
             response = client.get("/health")
@@ -862,7 +862,7 @@ class TestCrossRequestStateIntegration:
     ) -> None:
         """Test that API and CLI can have separate sessions."""
         # API session
-        import src.orchestrator.api.server as server_module
+        import orchestrator.api.server as server_module
 
         server_module._agent = orchestrator_with_mocks
 

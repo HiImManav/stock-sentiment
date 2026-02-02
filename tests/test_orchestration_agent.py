@@ -8,11 +8,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.orchestrator.agent import OrchestrationAgent, OrchestrationResult
-from src.orchestrator.comparison import ComparisonResult
-from src.orchestrator.execution import AgentResult, AgentStatus, ExecutionResult
-from src.orchestrator.memory import OrchestratorMemory
-from src.orchestrator.synthesis import SynthesisResult
+from orchestrator.agent import OrchestrationAgent, OrchestrationResult
+from orchestrator.comparison import ComparisonResult
+from orchestrator.execution import AgentResult, AgentStatus, ExecutionResult
+from orchestrator.memory import OrchestratorMemory
+from orchestrator.synthesis import SynthesisResult
 
 
 # =============================================================================
@@ -568,8 +568,8 @@ class TestLazyInitialization:
         assert agent._sec_agent is None
         assert agent._agents_initialized is False
 
-    @patch("src.orchestrator.agent.NewsSentimentAgent")
-    @patch("src.orchestrator.agent.SECFilingsAgent")
+    @patch("orchestrator.agent.NewsSentimentAgent")
+    @patch("orchestrator.agent.SECFilingsAgent")
     def test_agents_initialized_on_first_query(
         self,
         mock_sec_class: MagicMock,

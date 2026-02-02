@@ -8,21 +8,21 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.orchestrator.comparison.discrepancy import (
+from orchestrator.comparison.discrepancy import (
     Agreement,
     ComparisonResult,
     Discrepancy,
     DiscrepancySeverity,
     DiscrepancyType,
 )
-from src.orchestrator.comparison.signals import (
+from orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
     SignalExtractionResult,
     SignalType,
 )
-from src.orchestrator.execution.result import AgentResult, AgentStatus
-from src.orchestrator.synthesis.synthesizer import (
+from orchestrator.execution.result import AgentResult, AgentStatus
+from orchestrator.synthesis.synthesizer import (
     ResponseSynthesizer,
     SynthesisInput,
     SynthesisResult,

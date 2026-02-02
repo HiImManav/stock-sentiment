@@ -17,10 +17,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.orchestrator.agent import OrchestrationAgent, OrchestrationResult
-from src.orchestrator.comparison import ComparisonResult
-from src.orchestrator.execution import AgentResult, AgentStatus
-from src.orchestrator.memory import OrchestratorMemory
+from orchestrator.agent import OrchestrationAgent, OrchestrationResult
+from orchestrator.comparison import ComparisonResult
+from orchestrator.execution import AgentResult, AgentStatus
+from orchestrator.memory import OrchestratorMemory
 
 
 # =============================================================================

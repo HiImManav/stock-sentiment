@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from src.orchestrator.cli.main import cli
+from orchestrator.cli.main import cli
 
 
 # Helper to create a mock OrchestrationResult
@@ -48,7 +48,7 @@ def _mock_result(
 class TestChatCommand:
     """Tests for the chat command."""
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_exit(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat exits cleanly on 'exit' command."""
         runner = CliRunner()
@@ -57,7 +57,7 @@ class TestChatCommand:
         assert "Interactive Mode" in result.output
         assert "Goodbye" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_quit(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat exits cleanly on 'quit' command."""
         runner = CliRunner()
@@ -65,7 +65,7 @@ class TestChatCommand:
         assert result.exit_code == 0
         assert "Goodbye" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_sends_query(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat sends queries to the agent."""
         mock_agent = MagicMock()
@@ -78,7 +78,7 @@ class TestChatCommand:
         mock_agent.query.assert_called_once_with("What's the outlook for Apple?")
         assert "Apple outlook is positive." in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_handles_error(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat handles errors gracefully."""
         mock_agent = MagicMock()
@@ -89,7 +89,7 @@ class TestChatCommand:
         result = runner.invoke(cli, ["chat"], input="test\nexit\n")
         assert "Error: Connection failed" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_skips_empty_input(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat skips empty input."""
         mock_agent = MagicMock()
@@ -101,7 +101,7 @@ class TestChatCommand:
         assert "Goodbye" in result.output
         mock_agent.query.assert_not_called()
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_summary_command(self, mock_agent_cls: MagicMock) -> None:
         """Test that 'summary' command shows session summary."""
         mock_agent = MagicMock()
@@ -121,7 +121,7 @@ class TestChatCommand:
         assert "test-session" in result.output
         assert "AAPL" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_history_command(self, mock_agent_cls: MagicMock) -> None:
         """Test that 'history' command shows query history."""
         mock_agent = MagicMock()
@@ -138,7 +138,7 @@ class TestChatCommand:
         assert "AAPL" in result.output
         assert "TSLA" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_reset_command(self, mock_agent_cls: MagicMock) -> None:
         """Test that 'reset' command resets the session."""
         mock_agent = MagicMock()
@@ -150,7 +150,7 @@ class TestChatCommand:
         assert "Session reset" in result.output
         mock_agent.reset.assert_called_once()
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_chat_shows_discrepancy_indicator(self, mock_agent_cls: MagicMock) -> None:
         """Test that chat shows discrepancy indicator when present."""
         mock_agent = MagicMock()
@@ -169,7 +169,7 @@ class TestChatCommand:
 class TestQueryCommand:
     """Tests for the query command."""
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_basic(self, mock_agent_cls: MagicMock) -> None:
         """Test basic query execution."""
         mock_agent = MagicMock()
@@ -186,7 +186,7 @@ class TestQueryCommand:
             force_route=None,
         )
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_with_ticker(self, mock_agent_cls: MagicMock) -> None:
         """Test query with explicit ticker."""
         mock_agent = MagicMock()
@@ -202,7 +202,7 @@ class TestQueryCommand:
             force_route=None,
         )
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_with_source_news(self, mock_agent_cls: MagicMock) -> None:
         """Test query with news source."""
         mock_agent = MagicMock()
@@ -218,7 +218,7 @@ class TestQueryCommand:
             force_route="news_only",
         )
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_with_source_sec(self, mock_agent_cls: MagicMock) -> None:
         """Test query with SEC source."""
         mock_agent = MagicMock()
@@ -234,7 +234,7 @@ class TestQueryCommand:
             force_route="sec_only",
         )
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_with_source_both(self, mock_agent_cls: MagicMock) -> None:
         """Test query with both sources."""
         mock_agent = MagicMock()
@@ -250,7 +250,7 @@ class TestQueryCommand:
             force_route="both",
         )
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_json_output(self, mock_agent_cls: MagicMock) -> None:
         """Test query with JSON output."""
         mock_agent = MagicMock()
@@ -263,7 +263,7 @@ class TestQueryCommand:
         assert '"response": "JSON response"' in result.output
         assert '"confidence": 0.8' in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_error(self, mock_agent_cls: MagicMock) -> None:
         """Test query handles errors."""
         mock_agent = MagicMock()
@@ -275,7 +275,7 @@ class TestQueryCommand:
         assert result.exit_code == 1
         assert "Error: API error" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_query_shows_metadata(self, mock_agent_cls: MagicMock) -> None:
         """Test query shows metadata (agents, route, confidence)."""
         mock_agent = MagicMock()
@@ -307,7 +307,7 @@ class TestQueryCommand:
 class TestCompareCommand:
     """Tests for the compare command."""
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_basic(self, mock_agent_cls: MagicMock) -> None:
         """Test basic compare execution."""
         mock_agent = MagicMock()
@@ -323,7 +323,7 @@ class TestCompareCommand:
         assert "COMPARISON ANALYSIS: AAPL" in result.output
         mock_agent.compare.assert_called_once_with("AAPL")
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_lowercase_ticker(self, mock_agent_cls: MagicMock) -> None:
         """Test compare converts ticker to uppercase."""
         mock_agent = MagicMock()
@@ -335,7 +335,7 @@ class TestCompareCommand:
         assert result.exit_code == 0
         mock_agent.compare.assert_called_once_with("AAPL")
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_json_output(self, mock_agent_cls: MagicMock) -> None:
         """Test compare with JSON output."""
         mock_agent = MagicMock()
@@ -351,7 +351,7 @@ class TestCompareCommand:
         assert '"response": "Comparison"' in result.output
         assert '"had_discrepancies": true' in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_with_comparison_details(self, mock_agent_cls: MagicMock) -> None:
         """Test compare shows comparison details when available."""
         mock_comparison = MagicMock()
@@ -375,7 +375,7 @@ class TestCompareCommand:
         assert "Alignment Score" in result.output
         assert "Sources mostly agree" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_shows_discrepancies_list(self, mock_agent_cls: MagicMock) -> None:
         """Test compare shows list of discrepancies."""
         mock_discrepancy = MagicMock()
@@ -402,7 +402,7 @@ class TestCompareCommand:
         assert "DISCREPANCIES" in result.output
         assert "News positive but SEC shows risk" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_shows_agreements_list(self, mock_agent_cls: MagicMock) -> None:
         """Test compare shows list of agreements."""
         mock_agreement = MagicMock()
@@ -428,7 +428,7 @@ class TestCompareCommand:
         assert "AGREEMENTS" in result.output
         assert "Both sources agree on growth outlook" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_compare_error(self, mock_agent_cls: MagicMock) -> None:
         """Test compare handles errors."""
         mock_agent = MagicMock()
@@ -488,7 +488,7 @@ class TestCliGroup:
 class TestOutputFormatting:
     """Tests for output formatting functions."""
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_high_confidence_green(self, mock_agent_cls: MagicMock) -> None:
         """Test high confidence shows green color."""
         mock_agent = MagicMock()
@@ -500,7 +500,7 @@ class TestOutputFormatting:
         assert result.exit_code == 0
         assert "90%" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_medium_confidence_yellow(self, mock_agent_cls: MagicMock) -> None:
         """Test medium confidence formatted correctly."""
         mock_agent = MagicMock()
@@ -512,7 +512,7 @@ class TestOutputFormatting:
         assert result.exit_code == 0
         assert "50%" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_low_confidence_red(self, mock_agent_cls: MagicMock) -> None:
         """Test low confidence formatted correctly."""
         mock_agent = MagicMock()
@@ -524,7 +524,7 @@ class TestOutputFormatting:
         assert result.exit_code == 0
         assert "20%" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_execution_time_displayed(self, mock_agent_cls: MagicMock) -> None:
         """Test execution time is displayed."""
         mock_agent = MagicMock()
@@ -540,7 +540,7 @@ class TestOutputFormatting:
 class TestEdgeCases:
     """Tests for edge cases."""
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_empty_agents_used(self, mock_agent_cls: MagicMock) -> None:
         """Test handling of empty agents list."""
         mock_agent = MagicMock()
@@ -562,7 +562,7 @@ class TestEdgeCases:
         assert result.exit_code == 0
         assert "none" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_history_empty(self, mock_agent_cls: MagicMock) -> None:
         """Test history with no queries."""
         mock_agent = MagicMock()
@@ -574,7 +574,7 @@ class TestEdgeCases:
         assert result.exit_code == 0
         assert "No queries in this session" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_summary_empty_tickers(self, mock_agent_cls: MagicMock) -> None:
         """Test summary with no tickers analyzed."""
         mock_agent = MagicMock()
@@ -592,7 +592,7 @@ class TestEdgeCases:
         assert result.exit_code == 0
         assert "none" in result.output
 
-    @patch("src.orchestrator.cli.main.OrchestrationAgent")
+    @patch("orchestrator.cli.main.OrchestrationAgent")
     def test_long_query_truncated_in_history(self, mock_agent_cls: MagicMock) -> None:
         """Test long queries are truncated in history display."""
         mock_agent = MagicMock()

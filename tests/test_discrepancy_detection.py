@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.orchestrator.comparison.discrepancy import (
+from orchestrator.comparison.discrepancy import (
     Agreement,
     ComparisonResult,
     Discrepancy,
@@ -15,7 +15,7 @@ from src.orchestrator.comparison.discrepancy import (
     _directions_conflict,
     _topics_are_related,
 )
-from src.orchestrator.comparison.signals import (
+from orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
     SignalExtractionResult,

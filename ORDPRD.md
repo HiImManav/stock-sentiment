@@ -131,7 +131,7 @@ src/orchestrator/
 |------|-------------|--------|
 | 6.1 | Write comprehensive unit tests | Done |
 | 6.2 | Write integration tests | Done |
-| 6.3 | Add type hints and run mypy | Pending |
+| 6.3 | Add type hints and run mypy | Done |
 
 ## Key Components
 

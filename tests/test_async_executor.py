@@ -9,11 +9,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.orchestrator.execution.async_executor import (
+from orchestrator.execution.async_executor import (
     AsyncAgentExecutor,
     ExecutionResult,
 )
-from src.orchestrator.execution.result import AgentResult, AgentStatus
+from orchestrator.execution.result import AgentResult, AgentStatus
 
 
 class MockAgent:

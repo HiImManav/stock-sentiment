@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from src.orchestrator.execution.result import QueryClassification, RouteType
-from src.orchestrator.routing.classifier import QueryClassifier
+from orchestrator.execution.result import QueryClassification, RouteType
+from orchestrator.routing.classifier import QueryClassifier
 
 
 class TestQueryClassifier:

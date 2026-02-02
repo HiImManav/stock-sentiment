@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.orchestrator.comparison.signals import (
+from orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
     SignalExtractionResult,
