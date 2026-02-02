@@ -56,6 +56,16 @@ class AgentResult:
         """Check if the agent encountered an error."""
         return self.status == AgentStatus.ERROR
 
+    def to_dict(self) -> dict[str, str | float | None]:
+        """Convert to dictionary for serialization."""
+        return {
+            "agent_name": self.agent_name,
+            "status": self.status.value,
+            "response": self.response,
+            "error_message": self.error_message,
+            "execution_time_ms": self.execution_time_ms,
+        }
+
 
 @dataclass
 class QueryClassification:

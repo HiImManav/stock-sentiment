@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 4 In Progress (4.2 Done)
+## Current Status: Phase 4 In Progress (4.3 Done)
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -21,9 +21,10 @@
 - [x] 3.3 Implement ComparisonResult generation (included in 3.2)
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (36 tests, all passing, mypy clean)
 - [x] 4.2 Implement OrchestratorMemory (39 tests, all passing, mypy clean)
+- [x] 4.3 Implement OrchestrationAgent (43 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 4.3 Implement main OrchestrationAgent class
+- [ ] 4.4 End-to-end integration tests
 
 ## Pending Tasks (in order)
 
@@ -35,7 +36,7 @@
 ### Phase 4: Synthesis & Main Agent
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
 - [x] 4.2 Implement OrchestratorMemory
-- [ ] 4.3 Implement main OrchestrationAgent class
+- [x] 4.3 Implement main OrchestrationAgent class
 - [ ] 4.4 End-to-end integration tests
 
 ### Phase 5: CLI & API
@@ -121,3 +122,39 @@ When resuming work:
   - OrchestratedQueryEntry dataclass (create, properties, serialization)
   - OrchestratorMemory class (session_id, store, retrieve, filter, limit)
   - Integration tests (full workflow, partial failure, multi-ticker session)
+
+## Implementation Notes (Task 4.3)
+- Created `src/orchestrator/agent.py` with:
+  - `OrchestrationResult` dataclass: Holds full orchestration result (response, route_type, agents_used, had_discrepancies, confidence, execution_time_ms, query_id, news_result, sec_result, comparison)
+  - `OrchestrationAgent` class with methods:
+    - `__init__()`: Configures model, timeout, comparison toggle, accepts pre-built agents
+    - `query()`: Main synchronous entry point, orchestrates full workflow
+    - `query_async()`: Async version for use in async contexts
+    - `compare()`: Convenience method for explicit ticker comparison
+    - `reset()`: Clears memory and sub-agent state
+    - `get_session_summary()`: Returns session analytics
+    - `get_recent_queries()`: Retrieves query history with ticker/limit filters
+    - `_extract_ticker_from_query()`: Extracts ticker from company names or symbols
+    - `_ensure_agents_initialized()`: Lazy initialization of sub-agents
+  - Full integration with all Phase 1-4 components:
+    - QueryClassifier for intelligent routing
+    - AsyncAgentExecutor for parallel agent execution
+    - SignalExtractor and DiscrepancyDetector for comparison
+    - ResponseSynthesizer for LLM-based synthesis
+    - OrchestratorMemory for session tracking
+- Updated `src/orchestrator/__init__.py` with OrchestrationAgent, OrchestrationResult exports
+- Added `to_dict()` method to AgentResult in `src/orchestrator/execution/result.py`
+- Added `to_dict()` method to ComparisonResult in `src/orchestrator/comparison/discrepancy.py`
+- Created `tests/test_orchestration_agent.py` with 43 tests covering:
+  - OrchestrationResult dataclass (creation, serialization)
+  - Initialization (defaults, env vars, custom values, properties)
+  - Ticker extraction (company names, $symbols, explicit, filtering)
+  - Query routing (news_only, sec_only, both, force_route)
+  - Query execution (returns result, stores memory, tracks time, confidence)
+  - Async queries (query_async method)
+  - Comparison (compare method, enable/disable toggle)
+  - Reset (clears memory, calls sub-agent reset)
+  - Session management (summary, recent queries, filters)
+  - Lazy initialization (agents not created until needed)
+  - Error handling (timeout, exceptions)
+  - Integration tests (full flow, multiple queries)

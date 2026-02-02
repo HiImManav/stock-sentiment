@@ -142,6 +142,35 @@ class ComparisonResult:
         """Return only financial-related discrepancies."""
         return [d for d in self.discrepancies if d.discrepancy_type == DiscrepancyType.FINANCIAL_CONFLICT]
 
+    def to_dict(self) -> dict[str, object]:
+        """Convert to dictionary for serialization."""
+        return {
+            "discrepancy_count": self.discrepancy_count,
+            "agreement_count": self.agreement_count,
+            "overall_alignment": self.overall_alignment,
+            "has_critical_discrepancies": self.has_critical_discrepancies,
+            "summary": self.summary,
+            "discrepancies": [
+                {
+                    "type": d.discrepancy_type.value,
+                    "severity": d.severity.value,
+                    "topic": d.topic,
+                    "description": d.description,
+                    "confidence": d.confidence,
+                }
+                for d in self.discrepancies
+            ],
+            "agreements": [
+                {
+                    "topic": a.topic,
+                    "direction": a.direction.value,
+                    "description": a.description,
+                    "confidence": a.confidence,
+                }
+                for a in self.agreements
+            ],
+        }
+
 
 # Topic categories for grouping related topics
 SENTIMENT_TOPICS = {"sentiment", "outlook", "rating", "growth", "performance"}
