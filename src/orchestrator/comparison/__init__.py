@@ -1,6 +1,6 @@
 """News vs SEC result comparison components."""
 
-from src.orchestrator.comparison.discrepancy import (
+from orchestrator.comparison.discrepancy import (
     Agreement,
     ComparisonResult,
     Discrepancy,
@@ -8,7 +8,7 @@ from src.orchestrator.comparison.discrepancy import (
     DiscrepancySeverity,
     DiscrepancyType,
 )
-from src.orchestrator.comparison.signals import (
+from orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
     SignalExtractionResult,

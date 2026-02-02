@@ -36,6 +36,7 @@ infra = [
 [project.scripts]
 sec-agent = "sec_agent.cli.main:cli"
 news-agent = "news_agent.cli.main:cli"
+orchestrator = "orchestrator.cli.main:cli"
 
 [tool.setuptools.packages.find]
 where = ["src"]

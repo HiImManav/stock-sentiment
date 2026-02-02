@@ -12,8 +12,8 @@ from typing import Any
 
 import boto3
 
-from src.orchestrator.comparison.discrepancy import ComparisonResult
-from src.orchestrator.execution.result import AgentResult
+from orchestrator.comparison.discrepancy import ComparisonResult
+from orchestrator.execution.result import AgentResult
 
 SYNTHESIS_SYSTEM_PROMPT = """You are a financial analyst synthesizing information from two \
 sources: news sentiment analysis and SEC filings analysis. Your job is to provide a unified, \

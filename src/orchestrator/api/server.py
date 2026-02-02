@@ -7,7 +7,7 @@ from typing import Any, Literal
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from src.orchestrator.agent import OrchestrationAgent
+from orchestrator.agent import OrchestrationAgent
 
 app = FastAPI(
     title="Orchestration Agent API",

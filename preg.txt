@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Task 5.2 Complete, Task 5.3 Next
+## Current Status: Task 5.3 Complete, Task 5.4 Next
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -25,9 +25,10 @@
 - [x] 4.4 End-to-end integration tests (25 tests, all passing, mypy clean)
 - [x] 5.1 Implement CLI (chat, query, compare commands) (38 tests, all passing, mypy clean)
 - [x] 5.2 Implement FastAPI endpoints (29 tests, all passing, mypy clean)
+- [x] 5.3 Add orchestrator entry point to pyproject.toml (97 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 5.3 Add orchestrator entry point to pyproject.toml
+- [ ] 5.4 Implement Lambda handler
 
 ## Pending Tasks (in order)
 
@@ -45,7 +46,7 @@
 ### Phase 5: CLI & API
 - [x] 5.1 Implement CLI (chat, query, compare commands)
 - [x] 5.2 Implement FastAPI endpoints
-- [ ] 5.3 Add orchestrator entry point to pyproject.toml
+- [x] 5.3 Add orchestrator entry point to pyproject.toml
 - [ ] 5.4 Implement Lambda handler
 
 ### Phase 6: Testing & Polish
@@ -230,3 +231,29 @@ When resuming work:
   - **TestResetEndpoint** (2 tests): no agent, with agent
   - **TestAgentSingleton** (1 test): singleton creation
   - **TestEdgeCases** (4 tests): all options, no comparison result, confidence bounds, sources order independent
+
+## Implementation Notes (Task 5.3)
+- Added `orchestrator` entry point to `pyproject.toml`:
+  - Entry: `orchestrator = "orchestrator.cli.main:cli"`
+  - Follows same pattern as `sec-agent` and `news-agent` entry points
+- Updated all orchestrator module imports from `src.orchestrator` to `orchestrator`:
+  - This ensures the package works correctly when installed via setuptools
+  - Matches the pattern used by `news_agent` and `sec_agent` modules
+  - Updated files:
+    - `src/orchestrator/__init__.py`
+    - `src/orchestrator/agent.py`
+    - `src/orchestrator/cli/__init__.py`
+    - `src/orchestrator/cli/main.py`
+    - `src/orchestrator/api/__init__.py`
+    - `src/orchestrator/api/server.py`
+    - `src/orchestrator/comparison/__init__.py`
+    - `src/orchestrator/comparison/discrepancy.py`
+    - `src/orchestrator/synthesis/__init__.py`
+    - `src/orchestrator/synthesis/synthesizer.py`
+    - `src/orchestrator/routing/__init__.py`
+    - `src/orchestrator/routing/classifier.py`
+    - `src/orchestrator/execution/__init__.py`
+    - `src/orchestrator/execution/async_executor.py`
+    - `src/orchestrator/memory/__init__.py`
+- Verified all tests pass (97 tests across CLI, API, and E2E test files)
+- Verified mypy clean (18 source files, no issues)

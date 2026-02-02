@@ -11,7 +11,7 @@ from typing import Literal
 
 import click
 
-from src.orchestrator.agent import OrchestrationAgent, OrchestrationResult
+from orchestrator.agent import OrchestrationAgent, OrchestrationResult
 
 
 @click.group()

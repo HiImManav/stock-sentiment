@@ -10,21 +10,21 @@ from typing import Any, Literal
 
 from news_agent.agent import NewsSentimentAgent
 from sec_agent.agent import SECFilingsAgent
-from src.orchestrator.comparison import (
+from orchestrator.comparison import (
     ComparisonResult,
     DiscrepancyDetector,
     SignalExtractionResult,
     SignalExtractor,
 )
-from src.orchestrator.execution import (
+from orchestrator.execution import (
     AgentResult,
     AsyncAgentExecutor,
     ExecutionResult,
     RouteType,
 )
-from src.orchestrator.memory import AgentResultEntry, OrchestratorMemory
-from src.orchestrator.routing import QueryClassifier
-from src.orchestrator.synthesis import (
+from orchestrator.memory import AgentResultEntry, OrchestratorMemory
+from orchestrator.routing import QueryClassifier
+from orchestrator.synthesis import (
     ResponseSynthesizer,
     SynthesisInput,
     SynthesisResult,

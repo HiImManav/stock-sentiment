@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol
 
-from src.orchestrator.execution.result import AgentResult, AgentStatus
+from orchestrator.execution.result import AgentResult, AgentStatus
 
 
 class AgentProtocol(Protocol):

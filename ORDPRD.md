@@ -123,7 +123,7 @@ src/orchestrator/
 |------|-------------|--------|
 | 5.1 | Implement CLI with `chat`, `query`, `compare` commands | Done |
 | 5.2 | Implement FastAPI endpoints | Done |
-| 5.3 | Add `orchestrator` entry point to `pyproject.toml` | Pending |
+| 5.3 | Add `orchestrator` entry point to `pyproject.toml` | Done |
 | 5.4 | Implement Lambda handler | Pending |
 
 ### Phase 6: Testing & Polish

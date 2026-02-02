@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Pattern
 
-from src.orchestrator.execution.result import QueryClassification, RouteType
+from orchestrator.execution.result import QueryClassification, RouteType
 
 
 class QueryClassifier:

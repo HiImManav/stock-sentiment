@@ -1,6 +1,6 @@
 """Unified orchestrator memory components."""
 
-from src.orchestrator.memory.agent_memory import (
+from orchestrator.memory.agent_memory import (
     AgentResultEntry,
     OrchestratedQueryEntry,
     OrchestratorMemory,
