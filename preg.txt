@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 1 Complete - Ready for Phase 2
+## Current Status: Phase 2 Complete - Ready for Phase 3
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -13,9 +13,12 @@
 - [x] 1.2 Implement AgentResult and QueryClassification dataclasses
 - [x] 1.3 Implement QueryClassifier with rule-based patterns
 - [x] 1.4 Write unit tests for classifier (59 tests, all passing, mypy clean)
+- [x] 2.1 Implement AsyncAgentExecutor with timeout handling
+- [x] 2.2 Add graceful error handling for timeouts and exceptions
+- [x] 2.3 Write unit tests with mocked agents (33 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 2.1 Implement AsyncAgentExecutor with timeout handling
+- [ ] 3.1 Implement signal extraction from responses
 
 ## Pending Tasks (in order)
 

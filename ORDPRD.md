@@ -99,9 +99,9 @@ src/orchestrator/
 ### Phase 2: Async Execution
 | Task | Description | Status |
 |------|-------------|--------|
-| 2.1 | Implement `AsyncAgentExecutor` with timeout handling | Pending |
-| 2.2 | Add graceful error handling for timeouts and exceptions | Pending |
-| 2.3 | Write unit tests with mocked agents | Pending |
+| 2.1 | Implement `AsyncAgentExecutor` with timeout handling | Done |
+| 2.2 | Add graceful error handling for timeouts and exceptions | Done |
+| 2.3 | Write unit tests with mocked agents | Done |
 
 ### Phase 3: Comparison Logic
 | Task | Description | Status |
