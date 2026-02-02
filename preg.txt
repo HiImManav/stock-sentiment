@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 2 Complete - Ready for Phase 3
+## Current Status: Phase 3 In Progress - Task 3.1 Complete
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -16,19 +16,15 @@
 - [x] 2.1 Implement AsyncAgentExecutor with timeout handling
 - [x] 2.2 Add graceful error handling for timeouts and exceptions
 - [x] 2.3 Write unit tests with mocked agents (33 tests, all passing, mypy clean)
+- [x] 3.1 Implement signal extraction from responses (70 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 3.1 Implement signal extraction from responses
+- [ ] 3.2 Implement discrepancy detection rules
 
 ## Pending Tasks (in order)
 
-### Phase 2: Async Execution
-- [ ] 2.1 Implement AsyncAgentExecutor with timeout handling
-- [ ] 2.2 Add graceful error handling
-- [ ] 2.3 Write unit tests with mocked agents
-
 ### Phase 3: Comparison Logic
-- [ ] 3.1 Implement signal extraction from responses
+- [x] 3.1 Implement signal extraction from responses
 - [ ] 3.2 Implement discrepancy detection rules
 - [ ] 3.3 Implement ComparisonResult generation
 

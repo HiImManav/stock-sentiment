@@ -106,7 +106,7 @@ src/orchestrator/
 ### Phase 3: Comparison Logic
 | Task | Description | Status |
 |------|-------------|--------|
-| 3.1 | Implement signal extraction from agent responses | Pending |
+| 3.1 | Implement signal extraction from agent responses | Done |
 | 3.2 | Implement discrepancy detection rules | Pending |
 | 3.3 | Implement `ComparisonResult` generation | Pending |
 
