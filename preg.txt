@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Task 6.1 Complete, Phase 6 In Progress
+## Current Status: Task 6.2 Complete, Phase 6 In Progress
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -28,9 +28,10 @@
 - [x] 5.3 Add orchestrator entry point to pyproject.toml (97 tests, all passing, mypy clean)
 - [x] 5.4 Implement Lambda handler (14 tests, all passing, mypy clean)
 - [x] 6.1 Write comprehensive unit tests (77 tests for execution/result.py, all passing, mypy clean)
+- [x] 6.2 Write integration tests (28 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 6.2 Write integration tests
+- [ ] 6.3 Add type hints and run mypy
 
 ## Pending Tasks (in order)
 
@@ -53,7 +54,7 @@
 
 ### Phase 6: Testing & Polish
 - [x] 6.1 Write comprehensive unit tests
-- [ ] 6.2 Write integration tests
+- [x] 6.2 Write integration tests
 - [ ] 6.3 Add type hints and run mypy
 
 ## Key Files Reference
@@ -283,3 +284,17 @@ When resuming work:
   - **TestDataclassHashability** (2 tests): Verify dataclasses are not hashable (mutable)
 - All 77 tests passing, mypy clean
 - Addresses the gap identified in Phase 6: execution/result.py dataclasses now have dedicated unit tests
+
+## Implementation Notes (Task 6.2)
+- Created `tests/test_orchestrator_integration.py` with 28 comprehensive integration tests covering:
+  - **TestAPIOrchestrationIntegration** (6 tests): API-agent integration, source routing, session persistence, history, reset
+  - **TestCLIOrchestrationIntegration** (4 tests): CLI commands with OrchestrationAgent, JSON output, source routing, compare command
+  - **TestComponentIntegration** (4 tests): Classifier→Executor, Executor→Comparator, Comparator→Synthesizer, full pipeline
+  - **TestMemoryIntegration** (3 tests): Memory persistence, session summary accuracy, query filtering
+  - **TestErrorPropagationIntegration** (3 tests): Agent errors, timeouts, API error responses
+  - **TestLambdaHandlerIntegration** (2 tests): Handler wrapping, health endpoint routing
+  - **TestCrossRequestStateIntegration** (3 tests): Session isolation, sequential context building, state reset
+  - **TestSerializationIntegration** (3 tests): JSON serialization, API response matching, memory roundtrip
+- Tests verify real interactions between components using mocked sub-agents and Bedrock client
+- Total orchestrator tests: 173 (all passing)
+- Mypy clean on integration test file
