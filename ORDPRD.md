@@ -113,7 +113,7 @@ src/orchestrator/
 ### Phase 4: Synthesis & Main Agent
 | Task | Description | Status |
 |------|-------------|--------|
-| 4.1 | Implement `ResponseSynthesizer` with Bedrock | Pending |
+| 4.1 | Implement `ResponseSynthesizer` with Bedrock | Done |
 | 4.2 | Implement `OrchestratorMemory` | Pending |
 | 4.3 | Implement main `OrchestrationAgent` class | Pending |
 | 4.4 | End-to-end integration tests | Pending |

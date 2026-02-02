@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 3 Complete - Phase 4 Pending
+## Current Status: Phase 4 In Progress (4.1 Done)
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -19,9 +19,10 @@
 - [x] 3.1 Implement signal extraction from responses (70 tests, all passing, mypy clean)
 - [x] 3.2 Implement discrepancy detection rules (49 tests, all passing, mypy clean)
 - [x] 3.3 Implement ComparisonResult generation (included in 3.2)
+- [x] 4.1 Implement ResponseSynthesizer with Bedrock (36 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
+- [ ] 4.2 Implement OrchestratorMemory
 
 ## Pending Tasks (in order)
 
@@ -31,7 +32,7 @@
 - [x] 3.3 Implement ComparisonResult generation
 
 ### Phase 4: Synthesis & Main Agent
-- [ ] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
+- [x] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
 - [ ] 4.2 Implement OrchestratorMemory
 - [ ] 4.3 Implement main OrchestrationAgent class
 - [ ] 4.4 End-to-end integration tests
@@ -81,3 +82,22 @@ When resuming work:
     - `_generate_summary()`: Creates human-readable summary
 - Updated `src/orchestrator/comparison/__init__.py` with new exports
 - Created `tests/test_discrepancy_detection.py` with 49 tests
+
+## Implementation Notes (Task 4.1)
+- Created `src/orchestrator/synthesis/synthesizer.py` with:
+  - `SynthesisInput` dataclass: Holds user query, agent results, comparison, and ticker
+  - `SynthesisResult` dataclass: Contains response, confidence, sources_used, had_discrepancies
+  - `ResponseSynthesizer` class with methods:
+    - `synthesize()`: Main entry point, calls Bedrock Converse API
+    - `_build_user_message()`: Formats agent results and comparison for LLM
+    - `_calculate_confidence()`: Computes confidence based on source availability and alignment
+  - `SYNTHESIS_SYSTEM_PROMPT`: Instructs LLM to synthesize sources, highlight agreements/discrepancies
+- Updated `src/orchestrator/synthesis/__init__.py` with exports
+- Created `tests/test_synthesizer.py` with 36 tests covering:
+  - SynthesisInput/SynthesisResult dataclasses
+  - Synthesizer initialization (default, custom model, env var)
+  - Synthesis with both/one/no successful agents
+  - Handling of discrepancies and agreements
+  - User message building
+  - Confidence calculation
+  - Edge cases (empty/None responses, timeouts, errors)
