@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 4 In Progress (4.3 Done)
+## Current Status: Phase 4 Complete, Phase 5 Next
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -22,9 +22,10 @@
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (36 tests, all passing, mypy clean)
 - [x] 4.2 Implement OrchestratorMemory (39 tests, all passing, mypy clean)
 - [x] 4.3 Implement OrchestrationAgent (43 tests, all passing, mypy clean)
+- [x] 4.4 End-to-end integration tests (25 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 4.4 End-to-end integration tests
+- [ ] 5.1 Implement CLI (chat, query, compare commands)
 
 ## Pending Tasks (in order)
 
@@ -37,7 +38,7 @@
 - [x] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
 - [x] 4.2 Implement OrchestratorMemory
 - [x] 4.3 Implement main OrchestrationAgent class
-- [ ] 4.4 End-to-end integration tests
+- [x] 4.4 End-to-end integration tests
 
 ### Phase 5: CLI & API
 - [ ] 5.1 Implement CLI (chat, query, compare commands)
@@ -158,3 +159,22 @@ When resuming work:
   - Lazy initialization (agents not created until needed)
   - Error handling (timeout, exceptions)
   - Integration tests (full flow, multiple queries)
+
+## Implementation Notes (Task 4.4)
+- Created `tests/test_orchestrator_e2e.py` with 25 comprehensive end-to-end tests
+- Test categories:
+  - **E2E Query Lifecycle** (4 tests): Full query lifecycle, routing to both/news/sec, serialization
+  - **E2E Signal Extraction** (3 tests): Signal extraction from realistic responses, discrepancy detection, comparison toggle
+  - **E2E Memory Management** (4 tests): Query storage with full details, multi-query sessions, ticker filtering, reset
+  - **E2E Error Handling** (3 tests): Partial failures (news timeout, SEC exception), both agents failing
+  - **E2E Async Execution** (2 tests): Async query equivalence, multiple async queries in session
+  - **E2E Compare Method** (3 tests): Forces both agents, includes comparison, stores ticker
+  - **E2E Ticker Extraction** (3 tests): Company name extraction, $symbol extraction, explicit override
+  - **E2E Full Workflow** (3 tests): Analyst research workflow, multi-company comparison, error recovery
+- Uses realistic mock responses for news and SEC agents with extractable signals
+- Tests validate complete orchestration flow including:
+  - Parallel agent execution
+  - Signal extraction and discrepancy detection
+  - Response synthesis
+  - Memory tracking and session management
+  - Graceful error handling and partial failures

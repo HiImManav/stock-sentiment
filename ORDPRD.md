@@ -116,7 +116,7 @@ src/orchestrator/
 | 4.1 | Implement `ResponseSynthesizer` with Bedrock | Done |
 | 4.2 | Implement `OrchestratorMemory` | Done |
 | 4.3 | Implement main `OrchestrationAgent` class | Done |
-| 4.4 | End-to-end integration tests | Pending |
+| 4.4 | End-to-end integration tests | Done |
 
 ### Phase 5: CLI & API
 | Task | Description | Status |
