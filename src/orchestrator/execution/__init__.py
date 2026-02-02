@@ -1,6 +1,6 @@
 """Async agent execution components."""
 
-from orchestrator.execution.result import (
+from src.orchestrator.execution.result import (
     AgentResult,
     AgentStatus,
     QueryClassification,

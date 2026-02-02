@@ -11,14 +11,14 @@
 - [x] Created implementation plan
 - [x] 1.1 Create src/orchestrator/ module structure
 - [x] 1.2 Implement AgentResult and QueryClassification dataclasses
+- [x] 1.3 Implement QueryClassifier with rule-based patterns
 
 ## In Progress
-- [ ] 1.3 Implement QueryClassifier with rule-based patterns
+- [ ] 1.4 Write unit tests for classifier
 
 ## Pending Tasks (in order)
 
 ### Phase 1: Core Infrastructure
-- [ ] 1.3 Implement QueryClassifier with rule-based patterns
 - [ ] 1.4 Write unit tests for classifier
 
 ### Phase 2: Async Execution

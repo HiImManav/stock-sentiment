@@ -93,7 +93,7 @@ src/orchestrator/
 |------|-------------|--------|
 | 1.1 | Create module structure and `__init__.py` files | Done |
 | 1.2 | Implement `AgentResult` and `QueryClassification` dataclasses | Done |
-| 1.3 | Implement `QueryClassifier` with rule-based patterns | Pending |
+| 1.3 | Implement `QueryClassifier` with rule-based patterns | Done |
 | 1.4 | Write unit tests for classifier | Pending |
 
 ### Phase 2: Async Execution
