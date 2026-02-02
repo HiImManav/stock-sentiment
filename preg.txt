@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Task 5.1 Complete, Task 5.2 Next
+## Current Status: Task 5.2 Complete, Task 5.3 Next
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -24,9 +24,10 @@
 - [x] 4.3 Implement OrchestrationAgent (43 tests, all passing, mypy clean)
 - [x] 4.4 End-to-end integration tests (25 tests, all passing, mypy clean)
 - [x] 5.1 Implement CLI (chat, query, compare commands) (38 tests, all passing, mypy clean)
+- [x] 5.2 Implement FastAPI endpoints (29 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 5.2 Implement FastAPI endpoints
+- [ ] 5.3 Add orchestrator entry point to pyproject.toml
 
 ## Pending Tasks (in order)
 
@@ -43,7 +44,7 @@
 
 ### Phase 5: CLI & API
 - [x] 5.1 Implement CLI (chat, query, compare commands)
-- [ ] 5.2 Implement FastAPI endpoints
+- [x] 5.2 Implement FastAPI endpoints
 - [ ] 5.3 Add orchestrator entry point to pyproject.toml
 - [ ] 5.4 Implement Lambda handler
 
@@ -199,3 +200,33 @@ When resuming work:
   - **TestCliGroup** (5 tests): help text, subcommand help
   - **TestOutputFormatting** (4 tests): confidence colors (green/yellow/red), execution time display
   - **TestEdgeCases** (4 tests): empty agents list, empty history, empty tickers, long query truncation
+
+## Implementation Notes (Task 5.2)
+- Created `src/orchestrator/api/server.py` with:
+  - FastAPI app with title "Orchestration Agent API"
+  - Global agent singleton pattern with `get_agent()` function
+  - Request/Response Pydantic models:
+    - `QueryRequest`: query, ticker, sources, enable_comparison
+    - `QueryResponse`: answer, agents_used, had_discrepancies, confidence, execution_time_ms, session_id, query_id
+    - `CompareRequest`: ticker
+    - `CompareResponse`: answer, ticker, had_discrepancies, confidence, discrepancies, agreements, alignment_score, execution_time_ms, session_id, query_id
+    - `SessionSummaryResponse`: session_id, query_count, tickers_analyzed, discrepancy_rate, average_confidence
+    - `HealthResponse`, `ResetResponse`
+  - Endpoints:
+    - `GET /health`: Health check returning {"status": "healthy", "service": "orchestrator"}
+    - `POST /query`: Orchestrated query with optional ticker, sources, enable_comparison
+    - `POST /compare`: Explicit comparison between news and SEC for a ticker
+    - `GET /session/summary`: Session statistics and analytics
+    - `GET /session/history`: Query history with optional ticker/limit filters
+    - `POST /reset`: Reset session and sub-agent state
+  - Source routing logic: sources=['news'] -> news_only, sources=['sec'] -> sec_only, sources=['news','sec'] -> both
+- Updated `src/orchestrator/api/__init__.py` with `app`, `get_agent` exports
+- Created `tests/test_orchestrator_api.py` with 29 tests covering:
+  - **TestHealthEndpoint** (1 test): health check returns healthy status
+  - **TestQueryEndpoint** (10 tests): success, ticker, sources (news/sec/both), discrepancies, error handling, missing/empty query
+  - **TestCompareEndpoint** (5 tests): success, with discrepancies, lowercase ticker, error handling, missing ticker
+  - **TestSessionSummaryEndpoint** (2 tests): success, empty session
+  - **TestSessionHistoryEndpoint** (5 tests): success, ticker filter, limit, both filters, empty
+  - **TestResetEndpoint** (2 tests): no agent, with agent
+  - **TestAgentSingleton** (1 test): singleton creation
+  - **TestEdgeCases** (4 tests): all options, no comparison result, confidence bounds, sources order independent
