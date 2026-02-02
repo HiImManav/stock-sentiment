@@ -1,5 +1,13 @@
 """News vs SEC result comparison components."""
 
+from src.orchestrator.comparison.discrepancy import (
+    Agreement,
+    ComparisonResult,
+    Discrepancy,
+    DiscrepancyDetector,
+    DiscrepancySeverity,
+    DiscrepancyType,
+)
 from src.orchestrator.comparison.signals import (
     ExtractedSignal,
     SignalDirection,
@@ -9,6 +17,12 @@ from src.orchestrator.comparison.signals import (
 )
 
 __all__ = [
+    "Agreement",
+    "ComparisonResult",
+    "Discrepancy",
+    "DiscrepancyDetector",
+    "DiscrepancySeverity",
+    "DiscrepancyType",
     "ExtractedSignal",
     "SignalDirection",
     "SignalExtractionResult",

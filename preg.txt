@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 3 In Progress - Task 3.1 Complete
+## Current Status: Phase 3 Complete - Phase 4 Pending
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -17,16 +17,18 @@
 - [x] 2.2 Add graceful error handling for timeouts and exceptions
 - [x] 2.3 Write unit tests with mocked agents (33 tests, all passing, mypy clean)
 - [x] 3.1 Implement signal extraction from responses (70 tests, all passing, mypy clean)
+- [x] 3.2 Implement discrepancy detection rules (49 tests, all passing, mypy clean)
+- [x] 3.3 Implement ComparisonResult generation (included in 3.2)
 
 ## In Progress
-- [ ] 3.2 Implement discrepancy detection rules
+- [ ] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
 
 ## Pending Tasks (in order)
 
 ### Phase 3: Comparison Logic
 - [x] 3.1 Implement signal extraction from responses
-- [ ] 3.2 Implement discrepancy detection rules
-- [ ] 3.3 Implement ComparisonResult generation
+- [x] 3.2 Implement discrepancy detection rules
+- [x] 3.3 Implement ComparisonResult generation
 
 ### Phase 4: Synthesis & Main Agent
 - [ ] 4.1 Implement ResponseSynthesizer with Bedrock (Claude Opus 4.5)
@@ -60,3 +62,22 @@ When resuming work:
 2. Read ORDPRD.md for full architecture details
 3. Check the task status above
 4. Continue with next pending task
+
+## Implementation Notes (Task 3.2/3.3)
+- Created `src/orchestrator/comparison/discrepancy.py` with:
+  - `DiscrepancyType` enum: SENTIMENT_CONFLICT, FINANCIAL_CONFLICT, GUIDANCE_CONFLICT, RISK_MISMATCH, TOPIC_DISAGREEMENT
+  - `DiscrepancySeverity` enum: LOW, MEDIUM, HIGH
+  - `Discrepancy` dataclass for detected conflicts
+  - `Agreement` dataclass for detected agreements
+  - `ComparisonResult` dataclass combining all comparison data
+  - `DiscrepancyDetector` class with methods:
+    - `compare()`: Main comparison entry point
+    - `_detect_sentiment_conflicts()`: Finds sentiment mismatches
+    - `_detect_financial_conflicts()`: Finds financial metric conflicts
+    - `_detect_guidance_conflicts()`: Finds forward guidance conflicts
+    - `_detect_risk_mismatches()`: Finds risk sentiment gaps
+    - `_find_agreements()`: Identifies where sources agree
+    - `_calculate_alignment()`: Computes alignment score (-1.0 to 1.0)
+    - `_generate_summary()`: Creates human-readable summary
+- Updated `src/orchestrator/comparison/__init__.py` with new exports
+- Created `tests/test_discrepancy_detection.py` with 49 tests
