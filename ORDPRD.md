@@ -121,7 +121,7 @@ src/orchestrator/
 ### Phase 5: CLI & API
 | Task | Description | Status |
 |------|-------------|--------|
-| 5.1 | Implement CLI with `chat`, `query`, `compare` commands | Pending |
+| 5.1 | Implement CLI with `chat`, `query`, `compare` commands | Done |
 | 5.2 | Implement FastAPI endpoints | Pending |
 | 5.3 | Add `orchestrator` entry point to `pyproject.toml` | Pending |
 | 5.4 | Implement Lambda handler | Pending |

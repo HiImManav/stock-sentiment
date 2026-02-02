@@ -1,6 +1,6 @@
 # Orchestration Agent Progress Tracker
 
-## Current Status: Phase 4 Complete, Phase 5 Next
+## Current Status: Task 5.1 Complete, Task 5.2 Next
 
 ## Completed Tasks
 - [x] Explored news_agent structure and interface
@@ -23,9 +23,10 @@
 - [x] 4.2 Implement OrchestratorMemory (39 tests, all passing, mypy clean)
 - [x] 4.3 Implement OrchestrationAgent (43 tests, all passing, mypy clean)
 - [x] 4.4 End-to-end integration tests (25 tests, all passing, mypy clean)
+- [x] 5.1 Implement CLI (chat, query, compare commands) (38 tests, all passing, mypy clean)
 
 ## In Progress
-- [ ] 5.1 Implement CLI (chat, query, compare commands)
+- [ ] 5.2 Implement FastAPI endpoints
 
 ## Pending Tasks (in order)
 
@@ -41,7 +42,7 @@
 - [x] 4.4 End-to-end integration tests
 
 ### Phase 5: CLI & API
-- [ ] 5.1 Implement CLI (chat, query, compare commands)
+- [x] 5.1 Implement CLI (chat, query, compare commands)
 - [ ] 5.2 Implement FastAPI endpoints
 - [ ] 5.3 Add orchestrator entry point to pyproject.toml
 - [ ] 5.4 Implement Lambda handler
@@ -178,3 +179,23 @@ When resuming work:
   - Response synthesis
   - Memory tracking and session management
   - Graceful error handling and partial failures
+
+## Implementation Notes (Task 5.1)
+- Created `src/orchestrator/cli/main.py` with:
+  - `cli` Click group: Main entry point for orchestrator CLI
+  - `chat` command: Interactive chat session with special commands (summary, history, reset)
+  - `query` command: One-shot query with options for --ticker, --source (news/sec/both), --json-output
+  - `compare` command: Explicit comparison between news and SEC for a ticker with --json-output
+  - Helper functions:
+    - `_print_result()`: Pretty-prints orchestration result with confidence colors and metadata
+    - `_print_comparison_result()`: Detailed comparison output with discrepancies and agreements
+    - `_print_session_summary()`: Shows session statistics (query count, tickers, discrepancies)
+    - `_print_query_history()`: Lists recent queries with truncation for long queries
+- Updated `src/orchestrator/cli/__init__.py` with `cli` export
+- Created `tests/test_orchestrator_cli.py` with 38 tests covering:
+  - **TestChatCommand** (9 tests): exit/quit, query sending, error handling, empty input, summary/history/reset commands, discrepancy indicator
+  - **TestQueryCommand** (9 tests): basic query, ticker option, source options (news/sec/both), JSON output, error handling, metadata display
+  - **TestCompareCommand** (7 tests): basic compare, lowercase ticker, JSON output, comparison details, discrepancies list, agreements list, error handling
+  - **TestCliGroup** (5 tests): help text, subcommand help
+  - **TestOutputFormatting** (4 tests): confidence colors (green/yellow/red), execution time display
+  - **TestEdgeCases** (4 tests): empty agents list, empty history, empty tickers, long query truncation
